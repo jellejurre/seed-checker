@@ -58,12 +58,15 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifactId = archivesBaseName
+            version = version
+            groupId = group
             // add all the jars that should be included when publishing to maven
             artifact(remapJar) {
-                builtBy remapJar
+                builtBy jar
             }
             artifact(sourcesJar) {
-                builtBy remapSourcesJar
+                builtBy sourcesJar
             }
         }
     }
@@ -71,7 +74,7 @@ publishing {
     // select the repositories you want to publish to
     repositories {
         // uncomment to publish to the local maven
-        // mavenLocal()
+        mavenLocal()
     }
 }
 

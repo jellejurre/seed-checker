@@ -1,4 +1,4 @@
-package jellejurre.seedchunkchecker.serverMocks;
+package nl.jellejurre.seedchecker.serverMocks;
 
 import com.mojang.datafixers.DataFixer;
 import java.util.function.IntSupplier;

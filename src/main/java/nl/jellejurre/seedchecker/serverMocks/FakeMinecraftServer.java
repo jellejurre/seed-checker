@@ -1,4 +1,4 @@
-package jellejurre.seedchunkchecker.serverMocks;
+package nl.jellejurre.seedchecker.serverMocks;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import jellejurre.seedchunkchecker.ReflectionUtils;
+import nl.jellejurre.seedchecker.ReflectionUtils;
 import net.minecraft.command.DataCommandStorage;
 import net.minecraft.datafixer.Schemas;
 import net.minecraft.entity.boss.BossBarManager;

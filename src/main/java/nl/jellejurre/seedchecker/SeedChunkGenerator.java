@@ -1,4 +1,4 @@
-package jellejurre.seedchunkchecker;
+package nl.jellejurre.seedchecker;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -15,10 +15,10 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
-import jellejurre.seedchunkchecker.serverMocks.FakeLevelStorage;
-import jellejurre.seedchunkchecker.serverMocks.FakeLightingProvider;
-import jellejurre.seedchunkchecker.serverMocks.FakeServerWorld;
-import jellejurre.seedchunkchecker.serverMocks.FakeThreadedAnvilChunkStorage;
+import nl.jellejurre.seedchecker.serverMocks.FakeLevelStorage;
+import nl.jellejurre.seedchecker.serverMocks.FakeLightingProvider;
+import nl.jellejurre.seedchecker.serverMocks.FakeServerWorld;
+import nl.jellejurre.seedchecker.serverMocks.FakeThreadedAnvilChunkStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;

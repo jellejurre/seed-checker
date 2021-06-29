@@ -1,4 +1,4 @@
-package jellejurre.seedchunkchecker;
+package nl.jellejurre.seedchecker;
 
 import java.util.List;
 import java.util.Map;

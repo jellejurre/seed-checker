@@ -1,4 +1,4 @@
-package jellejurre.seedchunkchecker.serverMocks;
+package nl.jellejurre.seedchecker.serverMocks;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.DataFixer;
@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Executor;
-import jellejurre.seedchunkchecker.SeedChunkGenerator;
+import nl.jellejurre.seedchecker.SeedChunkGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
