@@ -1,4 +1,4 @@
-# SeedChecker 1.17.1
+# SeedChecker 1.17.1-pre1
 
 ## Install Instructions
 
