@@ -28,6 +28,14 @@ public class SeedChecker {
      * @param dimension the dimension to generate.
      */
     public SeedChecker(long seed, int targetLevel, SeedCheckerDimension dimension) {
+        //This is here to avoid OutOfMemoryErrors
+        if(Runtime.getRuntime().freeMemory()<50000){
+            try {
+                Thread.sleep(5000);
+            }catch (Exception e){
+
+            }
+        }
         SeedCheckerSettings.initialise();
         this.seed = seed;
         this.targetLevel = targetLevel;

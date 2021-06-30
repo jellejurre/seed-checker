@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -31,6 +32,7 @@ public class CrashTest {
                 BlockPos spawn = checker.getSpawnPos();
                 Box box = new Box(spawn.getX() - 48, 40, spawn.getZ() - 48, spawn.getX() + 48, 80,
                     spawn.getZ() + 48);
+                int bedrock = checker.getBlockCountInBox(Blocks.BEDROCK, box);
                 Map<BlockPos, BlockEntity> list = checker.getBlockEntitiesInBox(box);
             }
         } catch (Exception e){

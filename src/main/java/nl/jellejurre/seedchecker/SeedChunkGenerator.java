@@ -594,9 +594,14 @@ public class SeedChunkGenerator {
     private void SURFACE(ProtoChunk chunk) {
         if (chunk.getStatus().isAtLeast(ChunkStatus.SURFACE))
             return;
-        chunkGenerator.buildSurface(
-            new ChunkRegion(fakeServerWorld, ImmutableList.of(chunk), ChunkStatus.SURFACE, 0),
-            chunk);
+        //This is here to catch a very rare NPE in buildSurface. This means that 1 in 1000 wooded-badlands chunks will have an imperfect top. So be it.
+        try {
+            chunkGenerator.buildSurface(
+                new ChunkRegion(fakeServerWorld, ImmutableList.of(chunk), ChunkStatus.SURFACE, 0),
+                chunk);
+        } catch (NullPointerException e){
+
+        }
         chunk.setStatus(ChunkStatus.SURFACE);
     }
 
