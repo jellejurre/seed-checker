@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version '0.9-SNAPSHOT'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
 repositories {
@@ -34,7 +35,6 @@ processResources {
         duplicatesStrategy DuplicatesStrategy.INCLUDE
     }
 }
-
 // ensure that the encoding is set to UTF-8, no matter what the system default is
 // this fixes some edge cases with special characters not displaying correctly
 // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
@@ -52,29 +52,47 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 jar {
     from "LICENSE"
+    manifest.attributes(
+            'Multi-Release': 'true'
+    )
+}
+
+shadowJar {
+    dependsOn remapJar
 }
 
 // configure the maven publication
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        shadow(MavenPublication) {
             artifactId = archivesBaseName
             version = version
             groupId = group
             // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                builtBy jar
+//            artifact(remapJar) {
+//                builtBy jar
+//            }
+//            artifact(sourcesJar) {
+//                builtBy sourcesJar
+//            }
+            artifact(tasks["shadowJar"]){
+                classifier=""
             }
-            artifact(sourcesJar) {
-                builtBy sourcesJar
-            }
-        }
+      }
     }
 
     // select the repositories you want to publish to
     repositories {
         // uncomment to publish to the local maven
-        mavenLocal()
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/jellejurre/seed-checker"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+        //mavenLocal()
     }
 }
 
