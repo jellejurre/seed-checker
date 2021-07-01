@@ -59,4 +59,18 @@ public class Example {
         assertEquals("[3 potato, 4 carrot, 4 carrot, 3 dark_oak_log, 3 dark_oak_log, 3 dark_oak_log, 4 string, 1 experience_bottle, 3 tripwire_hook]", list.toString());
     }
 
+    @Test
+    public void mapExample(){
+        //Same checker, but for a test involving drawing a map, which crashed
+        SeedChecker checker = new SeedChecker(-6876956224386768041L);
+        Box box = new Box(-44, 48, 164, 140, 113, 348);
+        Map<BlockPos, BlockEntity> blockEntities = checker.getBlockEntitiesInBox(BlockEntityType.CHEST, box);
+        List<ItemStack> lootList = new ArrayList<>();
+        for(BlockPos pos : blockEntities.keySet()){
+            lootList.addAll(checker.generateChestLoot(pos));
+        }
+        assertEquals(new BlockPos(48, 63, 247), checker.getSpawnPos());
+        assertEquals("[2 iron_ingot, 2 emerald, 3 iron_ingot, 1 lapis_lazuli, 8 iron_nugget, 4 iron_nugget, 7 iron_nugget, 8 iron_nugget, 1 filled_map, 1 paper, 4 feather, 10 paper, 3 coal, 1 rotten_flesh, 3 coal, 1 leather_chestplate, 5 paper, 1 moss_block, 10 paper, 2 wheat, 2 wheat, 3 wheat, 2 wheat, 1 stone_axe, 1 golden_helmet]", lootList.toString());
+    }
+
 }
