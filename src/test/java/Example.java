@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.item.Items;
 import nl.jellejurre.seedchecker.SeedChecker;
 import nl.jellejurre.seedchecker.SeedCheckerDimension;
 import nl.jellejurre.seedchecker.TargetState;
@@ -52,10 +53,19 @@ public class Example {
             list.addAll(checker.generateChestLoot(pos));
         }
 
+        //Check carrot count in chests
+        int carrot = 0;
+        for(ItemStack i : list){
+            if(i.getItem()== Items.CARROT){
+                carrot+=i.getCount();
+            }
+        }
+
         //Check our results
         assertEquals(2, iron_golem);
         assertEquals(44, cactus);
         assertEquals(38, wool);
+        assertEquals(8, carrot);
         assertEquals("[3 potato, 4 carrot, 4 carrot, 3 dark_oak_log, 3 dark_oak_log, 3 dark_oak_log, 4 string, 1 experience_bottle, 3 tripwire_hook]", list.toString());
     }
 
