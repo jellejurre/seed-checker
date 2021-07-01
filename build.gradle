@@ -69,7 +69,6 @@ publishing {
             artifactId = archivesBaseName
             version = version
             groupId = group
-            // add all the jars that should be included when publishing to maven
 //            artifact(remapJar) {
 //                builtBy jar
 //            }
@@ -84,7 +83,7 @@ publishing {
 
     // select the repositories you want to publish to
     repositories {
-        // uncomment to get it from github packages instead
+        // uncomment to publish it to github packages instead
         /*maven {
             name = "GitHubPackages"
             url = "https://maven.pkg.github.com/jellejurre/seed-checker"
