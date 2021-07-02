@@ -318,6 +318,9 @@ public class SeedChunkGenerator {
      * @return the {@link BlockEntity} at those coordinate.
      */
     public BlockEntity getBlockEntity(int x, int y, int z){
+        if(targetLevel<8){
+            throw new IllegalStateException("Tried to generate blockentities without structure generation allowed.\nTo allow this, call the constructor of SeedChecker with third argument 8 or higher.");
+        }
         ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
         ProtoChunk chunk = chunkMap.get(pos);
         if (chunk == null) {
@@ -766,8 +769,8 @@ public class SeedChunkGenerator {
      * @return A map from {@link BlockPos} to {@link BlockEntity} containing all block entities within the box.
      */
     public Map<BlockPos, BlockEntity> getBlockEntitiesInBox(BlockEntityType type, Box box, Predicate<BlockEntity> predicate){
-        if(targetLevel<10){
-            throw new IllegalStateException("Tried to generate entities without entity generation allowed.\nTo allow this, call the constructor of SeedChecker with third argument 10 or higher.");
+        if(targetLevel<8){
+            throw new IllegalStateException("Tried to generate blockentities without structure generation allowed.\nTo allow this, call the constructor of SeedChecker with third argument 8 or higher.");
         }
         Map<BlockPos, BlockEntity> map = new HashMap<>();
         int chunkCountx = (int) box.getXLength()/16;
