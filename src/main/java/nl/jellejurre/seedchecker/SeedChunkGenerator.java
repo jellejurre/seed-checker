@@ -714,8 +714,8 @@ public class SeedChunkGenerator {
         if(targetLevel<10){
             throw new IllegalStateException("Tried to generate entities without entity generation allowed.\nTo allow this, call the constructor of SeedChecker with third argument 10 or higher.");
         }
-        int chunkCountx = (int) box.getXLength()/16;
-        int chunkCountz = (int) box.getZLength()/16;
+        int chunkCountx = (int) Math.ceil(box.getXLength()/16);
+        int chunkCountz = (int) Math.ceil(box.getZLength()/16);
         List<NbtCompound> list = Lists.newArrayList();
         for (int x = (int)box.minX>>4; x < ((int)box.minX>>4)+chunkCountx; x++) {
             for (int z = (int)box.minZ>>4; z < ((int)box.minZ>>4)+chunkCountz ; z++) {
@@ -773,8 +773,8 @@ public class SeedChunkGenerator {
             throw new IllegalStateException("Tried to generate blockentities without structure generation allowed.\nTo allow this, call the constructor of SeedChecker with third argument 8 or higher.");
         }
         Map<BlockPos, BlockEntity> map = new HashMap<>();
-        int chunkCountx = (int) box.getXLength()/16;
-        int chunkCountz = (int) box.getZLength()/16;
+        int chunkCountx = (int) Math.ceil(box.getXLength()/16);
+        int chunkCountz = (int) Math.ceil(box.getZLength()/16);
         for (int x = (int)box.minX>>4; x < ((int)box.minX>>4)+chunkCountx; x++) {
             for (int z = (int)box.minZ>>4; z < ((int)box.minZ>>4)+chunkCountz ; z++) {
                 ProtoChunk chunk = getOrBuildChunk(x, z);
@@ -821,8 +821,8 @@ public class SeedChunkGenerator {
             throw new IllegalStateException("Tried to generate blocks without block generation allowed.\nTo allow this, call the constructor of SeedChecker with third argument 7 or higher.");
         }
         int count = 0;
-        int chunkCountx = (int) box.getXLength()/16;
-        int chunkCountz = (int) box.getZLength()/16;
+        int chunkCountx = (int) Math.ceil(box.getXLength()/16);
+        int chunkCountz = (int) Math.ceil(box.getZLength()/16);
         for (int x = (int)box.minX>>4; x < ((int)box.minX>>4)+chunkCountx; x++) {
             for (int z = (int)box.minZ>>4; z < ((int)box.minZ>>4)+chunkCountz ; z++) {
                 ProtoChunk c = getOrBuildChunk(x, z);
