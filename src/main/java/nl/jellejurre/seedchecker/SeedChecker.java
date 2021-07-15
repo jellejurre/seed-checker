@@ -46,11 +46,29 @@ public class SeedChecker {
     /**
      * Constructor for SeedChecker.
      * @param seed the seed.
-     * @parmam state the target state to build the chunk to.
+     * @param state the target state to build the chunk to.
      * @param dimension the dimension.
      */
     public SeedChecker(long seed, TargetState state, SeedCheckerDimension dimension) {
         this(seed, state.getLevel(), dimension);
+    }
+
+    /**
+     * Constructor for SeedChecker.
+     * @param seed the seed.
+     * @param state the target state to build the chunk to.
+     */
+    public SeedChecker(long seed, int state){
+        this(seed, state, SeedCheckerDimension.OVERWORLD);
+    }
+
+    /**
+     * Constructor for SeedChecker.
+     * @param seed the seed.
+     * @param state the target state to build the chunk to.
+     */
+    public SeedChecker(long seed, TargetState state){
+        this(seed, state.getLevel());
     }
 
     /**
