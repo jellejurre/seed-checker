@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.item.Items;
+import net.minecraft.world.Heightmap;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.BiomeArray;
+import net.minecraft.world.chunk.Chunk;
 import nl.jellejurre.seedchecker.SeedChecker;
 import nl.jellejurre.seedchecker.SeedCheckerDimension;
 import nl.jellejurre.seedchecker.TargetState;
@@ -67,6 +71,28 @@ public class Example {
         assertEquals(38, wool);
         assertEquals(8, carrot);
         assertEquals("[3 potato, 4 carrot, 4 carrot, 3 dark_oak_log, 3 dark_oak_log, 3 dark_oak_log, 4 string, 1 experience_bottle, 3 tripwire_hook]", list.toString());
+    }
+
+    @Test
+    public void ChunkExample(){
+        //NOTE: This should only be used if there is no other method. Interacting with a chunk might throw errors or cause problems.
+        //These chunks are extremely powerful, but difficult to work with. Only use them if you know what you're doing.
+
+        //Set some variables as examples
+        long seed = 8040347553L;
+
+        //Instantiate our seedChecker
+        SeedChecker checker = new SeedChecker(seed, TargetState.FULL, SeedCheckerDimension.OVERWORLD);
+
+        //Get a chunk with a full target level.
+        //Note that you can't get access to functionality of a target level higher than the one you call in the constructor, only lower.
+        Chunk chunk = checker.getChunk(1, 2, TargetState.STRUCTURES.getLevel());
+
+        //Get the heightmap from this chunk.
+        Heightmap map = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE);
+
+        //Check our results.
+        assertEquals(69, map.get(1, 2));
     }
 
     @Test
