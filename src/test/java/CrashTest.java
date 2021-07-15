@@ -25,7 +25,6 @@ public class CrashTest {
     @Test
     public void singleThreadedTest(){
         try {
-            SeedCheckerSettings.initialise();
             for (int i = 0; i < 10; i++) {
                 long worldseed = ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
                 SeedChecker checker = new SeedChecker(worldseed);
@@ -43,7 +42,6 @@ public class CrashTest {
 
     @Test
     public void multiThreadedTest(){
-        SeedCheckerSettings.initialise();
         ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool((int)Math.ceil(Runtime.getRuntime().availableProcessors()*1/4d));
         for (int i = 0; i < 10; i++) {
             pool.execute(new TestTask());

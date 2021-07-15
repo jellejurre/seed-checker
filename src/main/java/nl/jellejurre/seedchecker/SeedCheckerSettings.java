@@ -30,6 +30,10 @@ public class SeedCheckerSettings {
     public static ResourceManager resourceManager;
     private static boolean init = false;
 
+    static {
+        initialise();
+    }
+
     public SeedCheckerSettings() {
 
     }
