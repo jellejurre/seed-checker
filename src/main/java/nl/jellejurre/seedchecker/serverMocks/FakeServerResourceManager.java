@@ -6,7 +6,6 @@ import static nl.jellejurre.seedchecker.SeedCheckerSettings.registryManager;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import nl.jellejurre.seedchecker.ReflectionUtils;
 import net.minecraft.loot.LootManager;
 import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.loot.function.LootFunctionManager;
@@ -20,6 +19,7 @@ import net.minecraft.server.command.CommandManager.RegistrationEnvironment;
 import net.minecraft.tag.TagManagerLoader;
 import net.minecraft.util.Unit;
 import net.minecraft.util.registry.DynamicRegistryManager;
+import nl.jellejurre.seedchecker.ReflectionUtils;
 
 
 public class FakeServerResourceManager extends ServerResourceManager{

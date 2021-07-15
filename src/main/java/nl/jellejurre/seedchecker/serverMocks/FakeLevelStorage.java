@@ -4,12 +4,12 @@ import com.mojang.datafixers.DataFixer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import nl.jellejurre.seedchecker.ReflectionUtils;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSaveHandler;
 import net.minecraft.world.level.storage.LevelStorage;
+import nl.jellejurre.seedchecker.ReflectionUtils;
 
 public class FakeLevelStorage extends LevelStorage {
     public Path savesDirectory;

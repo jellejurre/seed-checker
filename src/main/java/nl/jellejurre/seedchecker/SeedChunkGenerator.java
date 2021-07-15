@@ -15,10 +15,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
-import nl.jellejurre.seedchecker.serverMocks.FakeLevelStorage;
-import nl.jellejurre.seedchecker.serverMocks.FakeLightingProvider;
-import nl.jellejurre.seedchecker.serverMocks.FakeServerWorld;
-import nl.jellejurre.seedchecker.serverMocks.FakeThreadedAnvilChunkStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -65,6 +61,10 @@ import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.gen.NoiseChunkGenerator;
+import nl.jellejurre.seedchecker.serverMocks.FakeLevelStorage;
+import nl.jellejurre.seedchecker.serverMocks.FakeLightingProvider;
+import nl.jellejurre.seedchecker.serverMocks.FakeServerWorld;
+import nl.jellejurre.seedchecker.serverMocks.FakeThreadedAnvilChunkStorage;
 import org.apache.commons.lang3.StringUtils;
 
 public class SeedChunkGenerator {
