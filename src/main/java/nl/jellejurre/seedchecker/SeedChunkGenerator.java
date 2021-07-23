@@ -864,4 +864,16 @@ public class SeedChunkGenerator {
             }
         }
     }
+
+    /**
+     * Clear all the chunk data.
+     */
+    public void clearMemory(){
+        for(ChunkPos pos : chunkMap.keySet()){
+            ProtoChunk chunk = chunkMap.get(pos);
+            chunk = null;
+            chunkMap.remove(pos);
+        }
+        Runtime.getRuntime().gc();
+    }
 }

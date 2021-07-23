@@ -33,6 +33,7 @@ public class CrashTest {
                     spawn.getZ() + 48);
                 int bedrock = checker.getBlockCountInBox(Blocks.BEDROCK, box);
                 Map<BlockPos, BlockEntity> list = checker.getBlockEntitiesInBox(box);
+                checker.clearMemory();
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -54,6 +55,19 @@ public class CrashTest {
             }
         }
     }
+
+    @Test
+    public void clearMemoryTest(){
+        SeedChecker checker = new SeedChecker(1);
+        Runtime r = Runtime.getRuntime();
+        Box box = new Box(200, 0, 200, -200, 255, -200);
+        checker.getBlockCountInBox(Blocks.CHEST, box);
+        Long memoryAfterGen = r.maxMemory() - r.totalMemory() + r.freeMemory();
+        checker.clearMemory();
+        Long memoryAfterGC = r.maxMemory() - r.totalMemory() + r.freeMemory();
+        assert(memoryAfterGC>memoryAfterGen);
+    }
+
     public class TestTask implements Runnable{
         @Override
         public void run() {
@@ -62,6 +76,7 @@ public class CrashTest {
             BlockPos spawn = checker.getSpawnPos();
             Box box = new Box(spawn.getX()-48, 40, spawn.getZ()-48, spawn.getX()+48, 80, spawn.getZ()+48);
             Map<BlockPos, BlockEntity> list = checker.getBlockEntitiesInBox(box);
+            checker.clearMemory();
             count.put(worldseed, worldseed);
         }
     }

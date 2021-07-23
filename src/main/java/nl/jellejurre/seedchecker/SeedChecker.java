@@ -379,6 +379,13 @@ public class SeedChecker {
     }
 
     /**
+     * Clear all the chunk data.
+     */
+    public void clearMemory(){
+        seedChunkGenerator.clearMemory();
+    }
+
+    /**
      * Gets seed.
      * @return seed.
      */
