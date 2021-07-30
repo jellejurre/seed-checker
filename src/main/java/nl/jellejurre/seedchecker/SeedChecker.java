@@ -46,11 +46,29 @@ public class SeedChecker {
     /**
      * Constructor for SeedChecker.
      * @param seed the seed.
-     * @parmam state the target state to build the chunk to.
+     * @param state the target state to build the chunk to.
      * @param dimension the dimension.
      */
     public SeedChecker(long seed, TargetState state, SeedCheckerDimension dimension) {
         this(seed, state.getLevel(), dimension);
+    }
+
+    /**
+     * Constructor for SeedChecker.
+     * @param seed the seed.
+     * @param state the target state to build the chunk to.
+     */
+    public SeedChecker(long seed, int state){
+        this(seed, state, SeedCheckerDimension.OVERWORLD);
+    }
+
+    /**
+     * Constructor for SeedChecker.
+     * @param seed the seed.
+     * @param state the target state to build the chunk to.
+     */
+    public SeedChecker(long seed, TargetState state){
+        this(seed, state.getLevel());
     }
 
     /**
@@ -309,6 +327,62 @@ public class SeedChecker {
      */
     public void clearMemory(){
         seedChunkGenerator.clearMemory();
+    }
+
+    /**
+     * Get a {@link ProtoChunk} from chunk coordinates.
+     *
+     * NOTE: This should only be used if there is no other method. Interacting with a chunk might throw errors or cause problems.
+     * These chunks are extremely powerful, but difficult to work with. Only use them if you know what you're doing.
+     *
+     * @param chunkX the x coordinate of the chunk.
+     * @param chunkZ the z coordinate of the chunk.
+     * @return the {@link ProtoChunk} at that location.
+     */
+    public ProtoChunk getChunk(int chunkX, int chunkZ){
+        return seedChunkGenerator.getOrBuildChunk(chunkX, chunkZ);
+    }
+
+    /**
+     * Get a {@link ProtoChunk} from a {@link ChunkPos}.
+     *
+     * NOTE: This should only be used if there is no other method. Interacting with a chunk might throw errors or cause problems.
+     * These chunks are extremely powerful, but difficult to work with. Only use them if you know what you're doing.
+     *
+     * @param pos the position of the chunk.
+     * @return the {@link ProtoChunk} at that location.
+     */
+    public ProtoChunk getChunk(ChunkPos pos){
+        return seedChunkGenerator.getOrBuildChunk(pos);
+    }
+
+    /**
+     * Get a {@link ProtoChunk} from chunk coordinates and a target level.
+     *
+     * NOTE: This should only be used if there is no other method. Interacting with a chunk might throw errors or cause problems.
+     * These chunks are extremely powerful, but difficult to work with. Only use them if you know what you're doing.
+     *
+     * @param chunkX the x coordinate of the chunk.
+     * @param chunkZ the z coordinate of the chunk.
+     * @param targetLevel the target level of the chunk.
+     * @return the {@link ProtoChunk} at that location.
+     */
+    public ProtoChunk getChunk(int chunkX, int chunkZ, int targetLevel){
+        return seedChunkGenerator.getOrBuildChunk(chunkX, chunkZ, targetLevel);
+    }
+
+    /**
+     * Get a {@link ProtoChunk} from chunk coordinates.
+     *
+     * NOTE: This should only be used if there is no other method. Interacting with a chunk might throw errors or cause problems.
+     * These chunks are extremely powerful, but difficult to work with. Only use them if you know what you're doing.
+     *
+     * @param pos the position of the chunk.
+     * @param targetLevel the target level of the chunk.
+     * @return the {@link ProtoChunk} at that location.
+     */
+    public ProtoChunk getChunk(ChunkPos pos, int targetLevel){
+        return seedChunkGenerator.getOrBuildChunk(pos, targetLevel);
     }
 
     /**

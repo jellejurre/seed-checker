@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.item.map.MapState;
 import nl.jellejurre.seedchecker.SeedChunkGenerator;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -31,6 +32,7 @@ import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.gen.Spawner;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
+import org.jetbrains.annotations.Nullable;
 
 public class FakeServerWorld extends ServerWorld {
     private ObjectOpenHashSet loadedMobs;
@@ -98,6 +100,20 @@ public class FakeServerWorld extends ServerWorld {
     }
 
 
+    @Override
+    public int getNextMapId(){
+        return 0;
+    }
+
+    @Override
+    public void putMapState(MapState mapState) {
+    }
+
+    @Nullable
+    @Override
+    public MapState getMapState(String string) {
+        return null;
+    }
 
     @Override
     public Difficulty getDifficulty() {

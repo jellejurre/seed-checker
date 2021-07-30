@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.block.Block;
+import net.minecraft.item.Items;
 import net.minecraft.server.Main;
+import net.minecraft.world.Heightmap;
+import net.minecraft.world.chunk.Chunk;
 import nl.jellejurre.seedchecker.SeedChecker;
 import nl.jellejurre.seedchecker.SeedCheckerDimension;
 import nl.jellejurre.seedchecker.TargetState;
@@ -57,12 +60,57 @@ public class Example {
             list.addAll(checker.generateChestLoot(pos));
         }
 
+        //Check carrot count in chests
+        int carrot = 0;
+        for(ItemStack i : list){
+            if(i.getItem() == Items.CARROT){
+                carrot+=i.getCount();
+            }
+        }
+
         //Check our results
         assertEquals(new BlockPos(71, 64, 72), spawnpoint);
         assertEquals(2, carvedPumpkins);
         assertEquals(347, planks);
         assertEquals(4, cows);
+        assertEquals(8, carrot);
         assertEquals("[3 potato, 4 carrot, 4 carrot, 3 dark_oak_log, 3 dark_oak_log, 3 dark_oak_log, 4 string, 1 experience_bottle, 3 tripwire_hook]", list.toString());
+    }
+
+    @Test
+    public void mapExample(){
+        //Same checker, but for a test involving drawing a map, which crashed
+        SeedChecker checker = new SeedChecker(-6876956224386768041L);
+        Box box = new Box(-44, 48, 164, 140, 113, 348);
+        Map<BlockPos, BlockEntity> blockEntities = checker.getBlockEntitiesInBox(BlockEntityType.CHEST, box);
+        List<ItemStack> lootList = new ArrayList<>();
+        for(BlockPos pos : blockEntities.keySet()){
+            lootList.addAll(checker.generateChestLoot(pos));
+        }
+        assertEquals(new BlockPos(48, 63, 247), checker.getSpawnPos());
+        assertEquals("[2 map, 1 paper, 2 map, 2 stick, 1 stick, 2 iron_ingot, 2 emerald, 3 iron_ingot, 1 lapis_lazuli, 8 iron_nugget, 4 iron_nugget, 7 iron_nugget, 8 iron_nugget, 1 filled_map, 1 paper, 4 feather, 10 paper, 3 coal, 1 rotten_flesh, 3 coal, 1 leather_chestplate, 5 potato, 13 wheat, 7 carrot, 2 wheat, 2 wheat, 3 wheat, 2 wheat, 1 stone_axe, 1 golden_helmet, 3 apple, 2 apple, 1 potato, 4 potato, 3 bread]", lootList.toString());
+    }
+
+    @Test
+    public void ChunkExample(){
+        //NOTE: This should only be used if there is no other method. Interacting with a chunk might throw errors or cause problems.
+        //These chunks are extremely powerful, but difficult to work with. Only use them if you know what you're doing.
+
+        //Set some variables as examples
+        long seed = 8040347553L;
+
+        //Instantiate our seedChecker
+        SeedChecker checker = new SeedChecker(seed, TargetState.FULL, SeedCheckerDimension.OVERWORLD);
+
+        //Get a chunk with a full target level.
+        //Note that you can't get access to functionality of a target level higher than the one you call in the constructor, only lower.
+        Chunk chunk = checker.getChunk(1, 2, TargetState.STRUCTURES.getLevel());
+
+        //Get the heightmap from this chunk.
+        Heightmap map = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE);
+
+        //Check our results.
+        assertEquals(69, map.get(1, 2));
     }
 
 }
