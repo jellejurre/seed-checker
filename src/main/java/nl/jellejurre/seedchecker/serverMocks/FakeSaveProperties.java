@@ -3,9 +3,9 @@ package nl.jellejurre.seedchecker.serverMocks;
 import com.mojang.serialization.Lifecycle;
 import java.util.Set;
 import net.minecraft.client.world.GeneratorType;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resource.DataPackSettings;
-import net.minecraft.util.registry.DynamicRegistryManager;
+import net.minecraft.util.registry.RegistryTracker;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
@@ -19,17 +19,18 @@ public class FakeSaveProperties implements SaveProperties {
     private FakeServerWorldProperties fakeServerWorldProperties = new FakeServerWorldProperties();
     private GeneratorOptions generatorOptions;
 
-    public FakeSaveProperties(DynamicRegistryManager.Impl registryManager, long seed) {
-        generatorOptions = GeneratorType.DEFAULT.createDefaultOptions(registryManager, seed, true, false);
+    public FakeSaveProperties(RegistryTracker.Modifiable registryManager, long seed) {
+        generatorOptions = GeneratorType.DEFAULT.method_29077(registryManager, seed, true, false);
     }
 
     @Override
-    public DataPackSettings getDataPackSettings() {
+    public DataPackSettings method_29589() {
         return null;
     }
 
     @Override
-    public void updateLevelInfo(DataPackSettings dataPackSettings) {
+    public void method_29590(DataPackSettings dataPackSettings) {
+
     }
 
     @Override
@@ -48,13 +49,15 @@ public class FakeSaveProperties implements SaveProperties {
 
     @Nullable
     @Override
-    public NbtCompound getCustomBossEvents() {
+    public CompoundTag getCustomBossEvents() {
         return null;
     }
 
     @Override
-    public void setCustomBossEvents(@Nullable NbtCompound nbt) {
+    public void setCustomBossEvents(@Nullable CompoundTag tag) {
+
     }
+
 
     @Override
     public ServerWorldProperties getMainWorldProperties() {
@@ -67,8 +70,8 @@ public class FakeSaveProperties implements SaveProperties {
     }
 
     @Override
-    public NbtCompound cloneWorldNbt(DynamicRegistryManager registryManager,
-                                     @Nullable NbtCompound playerNbt) {
+    public CompoundTag cloneWorldTag(RegistryTracker registryTracker,
+                                     @Nullable CompoundTag compoundTag) {
         return null;
     }
 
@@ -125,17 +128,18 @@ public class FakeSaveProperties implements SaveProperties {
     }
 
     @Override
-    public NbtCompound getPlayerData() {
+    public CompoundTag getPlayerData() {
         return null;
     }
 
     @Override
-    public NbtCompound getDragonFight() {
+    public CompoundTag method_29036() {
         return null;
     }
 
     @Override
-    public void setDragonFight(NbtCompound nbt) {
+    public void method_29037(CompoundTag compoundTag) {
+
     }
 
     @Override
@@ -144,7 +148,9 @@ public class FakeSaveProperties implements SaveProperties {
     }
 
     @Override
-    public Lifecycle getLifecycle() {
+    public Lifecycle method_29588() {
         return null;
     }
+
+    ;
 }

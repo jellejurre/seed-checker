@@ -15,13 +15,11 @@ public class FakeThreadedAnvilChunkStorage extends ThreadedAnvilChunkStorage {
                                          LevelStorage.Session session,
                                          DataFixer dataFixer,
                                          ChunkProvider chunkProvider){
-        super(world, session, dataFixer, null, Util.getMainWorkerExecutor(), new FakeThreadExecutor("ThreadedAnvilChunkStorageMain") ,
-            chunkProvider,
-            null, null, null,
-            null, 10, false);
+        super(world, session, dataFixer, null, Util.getServerWorkerExecutor(), new FakeThreadExecutor("ThreadedAnvilChunkStorageMain") ,
+            chunkProvider,  null, null, null,  10, false);
     }
     public ServerLightingProvider getLightingProvider(){
-        return super.getLightingProvider();
+        return super.getLightProvider();
     }
 
     @Override

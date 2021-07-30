@@ -66,12 +66,6 @@ public class FakeServerWorldProperties implements ServerWorldProperties {
     public void setWanderingTraderSpawnChance(int wanderingTraderSpawnChance) {
     }
 
-    @Nullable
-    @Override
-    public UUID getWanderingTraderId() {
-        return null;
-    }
-
     @Override
     public void setWanderingTraderId(UUID uuid) {
     }
@@ -134,10 +128,6 @@ public class FakeServerWorldProperties implements ServerWorldProperties {
     }
 
     @Override
-    public void setSpawnAngle(float angle) {
-    }
-
-    @Override
     public int getSpawnX() {
         return 0;
     }
@@ -149,11 +139,6 @@ public class FakeServerWorldProperties implements ServerWorldProperties {
 
     @Override
     public int getSpawnZ() {
-        return 0;
-    }
-
-    @Override
-    public float getSpawnAngle() {
         return 0;
     }
 

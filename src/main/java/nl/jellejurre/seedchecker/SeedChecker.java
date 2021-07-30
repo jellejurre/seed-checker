@@ -9,7 +9,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -222,9 +222,9 @@ public class SeedChecker {
      * @param name A simple filter applied to the entity name.
      * @param box The box to search within.
      * @param predicate A more advanced filter to check if the entity matches your criteria.
-     * @return A list of {@link NbtCompound}s of the entities that where found.
+     * @return A list of {@link CompoundTag}s of the entities that where found.
      */
-    public List<NbtCompound> getEntitiesInBox(String name, Box box, Predicate<NbtCompound> predicate) {
+    public List<CompoundTag> getEntitiesInBox(String name, Box box, Predicate<CompoundTag> predicate) {
         return seedChunkGenerator.getEntitiesInBox(name, box ,predicate);
     }
 
@@ -235,9 +235,9 @@ public class SeedChecker {
      *       appropriate type (NbtLong, NbtString, etc).
      * @param name A simple filter applied to the entity name.
      * @param box The box to search within.
-     * @return A list of {@link NbtCompound}s of the entities that where found.
+     * @return A list of {@link CompoundTag}s of the entities that where found.
      */
-    public List<NbtCompound> getEntitiesInBox(String name, Box box) {
+    public List<CompoundTag> getEntitiesInBox(String name, Box box) {
         return seedChunkGenerator.getEntitiesInBox(name, box);
     }
 
@@ -247,9 +247,9 @@ public class SeedChecker {
      * NOTE: NbtCompounds arent great to work with. When getting a value from it you have to first cast it to the
      *       appropriate type (NbtLong, NbtString, etc).
      * @param box The box to search within.
-     * @return A list of {@link NbtCompound}s of the entities that where found.
+     * @return A list of {@link CompoundTag}s of the entities that where found.
      */
-    public List<NbtCompound> getEntitiesInBox(Box box) {
+    public List<CompoundTag> getEntitiesInBox(Box box) {
         return seedChunkGenerator.getEntitiesInBox(box);
     }
 
@@ -302,6 +302,13 @@ public class SeedChecker {
      */
     public void printArea(Box box) {
         seedChunkGenerator.printArea(box);
+    }
+
+    /**
+     * Clear all the chunk data.
+     */
+    public void clearMemory(){
+        seedChunkGenerator.clearMemory();
     }
 
     /**

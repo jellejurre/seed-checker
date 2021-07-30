@@ -60,11 +60,6 @@ public class FakeLevelStorage extends LevelStorage {
         }
 
         @Override
-        public WorldSaveHandler createSaveHandler() {
-            return null;
-        }
-
-        @Override
         public Path getDirectory(WorldSavePath savePath) {
             return Path.of("this.does.not.exist");
         }

@@ -35,26 +35,8 @@ public class FakeLightingProvider extends LightingProvider {
     }
 
     @Override
-    public void setSectionStatus(ChunkSectionPos pos, boolean notReady) {
-    }
-
-    @Override
-    public void setColumnEnabled(ChunkPos chunkPos, boolean bl) {
-    }
-
-    @Override
     public ChunkLightingView get(LightType lightType) {
         return null;
-    }
-
-    @Override
-    public String displaySectionLevel(LightType lightType, ChunkSectionPos chunkSectionPos) {
-        return null;
-    }
-
-    @Override
-    public void enqueueSectionData(LightType lightType, ChunkSectionPos pos,
-                                   @Nullable ChunkNibbleArray nibbles, boolean bl) {
     }
 
     @Override
@@ -64,24 +46,5 @@ public class FakeLightingProvider extends LightingProvider {
     @Override
     public int getLight(BlockPos pos, int ambientDarkness) {
         return 0;
-    }
-
-    @Override
-    public int getHeight() {
-        return 0;
-    }
-
-    @Override
-    public int getBottomY() {
-        return 0;
-    }
-
-    @Override
-    public int getTopY() {
-        return 0;
-    }
-
-    @Override
-    public void setSectionStatus(BlockPos pos, boolean notReady) {
     }
 }

@@ -1271,12 +1271,12 @@ public class FakeLogger implements ExtendedLogger {
 
     @Override
     public boolean isDebugEnabled() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isDebugEnabled(Marker marker) {
-        return true;
+        return false;
     }
 
     @Override

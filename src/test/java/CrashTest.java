@@ -2,6 +2,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class CrashTest {
     public static ConcurrentHashMap<Long, Long> count = new ConcurrentHashMap<>();
 
     @Test
-    public void singleThreadedTest(){
+    public void singleThreadedTest() {
         try {
             SeedCheckerSettings.initialise();
             for (int i = 0; i < 10; i++) {
@@ -48,7 +49,7 @@ public class CrashTest {
         for (int i = 0; i < 10; i++) {
             pool.execute(new TestTask());
         }
-        while(count.size()<10){
+        while(count.size() < 10){
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -56,6 +57,7 @@ public class CrashTest {
             }
         }
     }
+
     public class TestTask implements Runnable{
         @Override
         public void run() {

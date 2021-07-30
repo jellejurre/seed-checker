@@ -9,12 +9,40 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resource.DataPackSettings;
+import net.minecraft.resource.FileResourcePackProvider;
+import net.minecraft.resource.ResourcePack;
+import net.minecraft.resource.ResourcePackProfile;
+import net.minecraft.resource.ResourcePackProvider;
+import net.minecraft.resource.ResourcePackSource;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.VanillaDataPackProvider;
+import net.minecraft.resource.metadata.PackResourceMetadata;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.SpawnLocating;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.WorldSavePath;
+import net.minecraft.util.registry.RegistryTracker;
+import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.chunk.ChunkGeneratorType;
+import net.minecraft.world.gen.chunk.SurfaceChunkGenerator;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.DefaultBiomeFeatures;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.FeatureConfig;
 import nl.jellejurre.seedchecker.serverMocks.FakeLevelStorage;
 import nl.jellejurre.seedchecker.serverMocks.FakeLightingProvider;
 import nl.jellejurre.seedchecker.serverMocks.FakeServerWorld;
@@ -31,8 +59,6 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.resource.ServerResourceManager;
@@ -46,7 +72,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.Heightmap;
@@ -61,26 +86,23 @@ import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.chunk.UpgradeData;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.GeneratorOptions;
-import net.minecraft.world.gen.NoiseChunkGenerator;
 import org.apache.commons.lang3.StringUtils;
 
 public class SeedChunkGenerator {
-    private final ConcurrentHashMap<ChunkPos, ProtoChunk> chunkMap =
-        new ConcurrentHashMap<>();
+    private final HashMap<ChunkPos, ProtoChunk> chunkMap =
+        new HashMap<>();
     private VanillaLayeredBiomeSource biomeSource;
     private SeedCheckerDimension dimension;
-    private NoiseChunkGenerator chunkGenerator;
+    private SurfaceChunkGenerator chunkGenerator;
     private FakeLevelStorage levelStorage;
     private StructureManager structureManager;
     private FakeServerWorld fakeServerWorld;
     private LightingProvider fakeLightingProvider;
-    private DynamicRegistryManager.Impl registryManager;
+    private RegistryTracker.Modifiable registryManager;
     private ResourcePackManager resourcePackManager;
     private ServerResourceManager serverResourceManager;
-    private ResourceManager resourceManager;
     private FakeLevelStorage.FakeSession session;
     private long seed;
     private int targetLevel;
@@ -101,16 +123,16 @@ public class SeedChunkGenerator {
         registryManager = SeedCheckerSettings.registryManager;
         resourcePackManager = SeedCheckerSettings.resourcePackManager;
         serverResourceManager = SeedCheckerSettings.serverResourceManager;
-        resourceManager = SeedCheckerSettings.resourceManager;
-        biomeSource = new VanillaLayeredBiomeSource(seed, false, false,
-            registryManager.get(Registry.BIOME_KEY));
+
+        biomeSource = new VanillaLayeredBiomeSource(seed, false, false);
+        MinecraftServer.loadDataPacks(resourcePackManager, DataPackSettings.SAFE_MODE, true);
         biomeSource.getTopMaterials();
         //We don't want anything storing anything
         levelStorage = FakeLevelStorage.create(Path.of(""));
         try {
             session = levelStorage.createSession();
             structureManager =
-                new StructureManager(resourceManager,
+                new StructureManager(SeedCheckerSettings.resourceManager,
                     session,
                     Schemas.getFixer());
         } catch (IOException e){
@@ -135,29 +157,28 @@ public class SeedChunkGenerator {
     }
 
     private void initOverworld() {
-        chunkGenerator = GeneratorOptions
-            .createOverworldGenerator(registryManager.get(Registry.BIOME_KEY), registryManager.get(Registry.CHUNK_GENERATOR_SETTINGS_KEY), seed);
-        fakeServerWorld = FakeServerWorld.create(registryManager, World.OVERWORLD,
-            registryManager.get(Registry.DIMENSION_TYPE_KEY)
-                .getOrThrow(DimensionType.OVERWORLD_REGISTRY_KEY), seed,
-            resourcePackManager, chunkGenerator, serverResourceManager, this, session);
+        chunkGenerator = GeneratorOptions.createOverworldGenerator(seed);
+        fakeServerWorld = FakeServerWorld.create(World.OVERWORLD,
+            DimensionType.OVERWORLD_REGISTRY_KEY, DimensionType.getOverworldDimensionType(), seed, resourcePackManager,// .orElseGet()
+            chunkGenerator, serverResourceManager, this, session);
     }
 
     private void initNether() {
-        chunkGenerator = new NoiseChunkGenerator(MultiNoiseBiomeSource.Preset.NETHER.getBiomeSource(registryManager.get(Registry.BIOME_KEY), seed), seed, () -> registryManager.get(Registry.CHUNK_GENERATOR_SETTINGS_KEY).getOrThrow(
-            ChunkGeneratorSettings.NETHER));
-        fakeServerWorld = FakeServerWorld.create(registryManager, World.NETHER,
-            registryManager.get(Registry.DIMENSION_TYPE_KEY)
-                .getOrThrow(DimensionType.THE_NETHER_REGISTRY_KEY), seed,
-            resourcePackManager, chunkGenerator, serverResourceManager, this, session);
+        chunkGenerator = new SurfaceChunkGenerator(MultiNoiseBiomeSource.Preset.NETHER.getBiomeSource(seed), seed, ChunkGeneratorType.Preset.NETHER.getChunkGeneratorType());
+        fakeServerWorld = FakeServerWorld.create(World.NETHER,
+            DimensionType.THE_NETHER_REGISTRY_KEY, registryManager.get(Registry.DIMENSION_TYPE_KEY).get()
+                .get(DimensionType.THE_NETHER_REGISTRY_KEY), seed, resourcePackManager,// .orElseGet()
+            chunkGenerator, serverResourceManager, this, session);
     }
 
-    private void initEnd(){
-        chunkGenerator = new NoiseChunkGenerator(new TheEndBiomeSource(registryManager.get(Registry.BIOME_KEY), seed), seed, () -> registryManager.get(Registry.CHUNK_GENERATOR_SETTINGS_KEY).getOrThrow(ChunkGeneratorSettings.END));
-        fakeServerWorld = FakeServerWorld.create(registryManager, World.NETHER,
-            registryManager.get(Registry.DIMENSION_TYPE_KEY)
-                .getOrThrow(DimensionType.THE_END_REGISTRY_KEY), seed,
-            resourcePackManager, chunkGenerator, serverResourceManager, this, session);
+    private void initEnd() {
+        chunkGenerator = new SurfaceChunkGenerator(new TheEndBiomeSource(seed), seed, ChunkGeneratorType.Preset.END.getChunkGeneratorType());
+        DimensionType end = registryManager.get(Registry.DIMENSION_TYPE_KEY).get().get(DimensionType.THE_END_REGISTRY_KEY);
+        ReflectionUtils.setValueOfField(end, "hasEnderDragonFight", false);
+        fakeServerWorld = FakeServerWorld.create(World.END,
+            DimensionType.THE_END_REGISTRY_KEY, registryManager.get(Registry.DIMENSION_TYPE_KEY).get()
+                .get(DimensionType.THE_END_REGISTRY_KEY), seed, resourcePackManager,// .orElseGet()
+            chunkGenerator, serverResourceManager, this, session);
     }
 
 
@@ -165,60 +186,74 @@ public class SeedChunkGenerator {
      * Get the spawn position of the current seed.
      * @return the {@link BlockPos} of the spawnposition.
      */
-    public BlockPos getSpawnPos(){
-        int i = 0;
-        Random random = new Random(seed);
-        BlockPos lv3 = biomeSource.locateBiome(0, 63, 0, 256, biome -> biome.getSpawnSettings().isPlayerSpawnFriendly(), random);
-        ChunkPos chunkPos;
-        if (lv3 == null) {
-            chunkPos = new ChunkPos(0, 0);
+    public BlockPos getSpawnPos() {
+        ChunkGenerator chunkGenerator = fakeServerWorld.getChunkManager().getChunkGenerator();
+        boolean bl = false;
+        boolean bl2 = false;
+        boolean bl3 = true;
+        BlockPos spawnpos;
+        if (!bl3) {
+            spawnpos = BlockPos.ORIGIN.up(chunkGenerator.getSpawnHeight());
+        } else if (bl2) {
+            spawnpos = BlockPos.ORIGIN.up();
         } else {
-            chunkPos = new ChunkPos(lv3);
-        }
-        boolean bl3 = false;
-        for (Block lv5 : BlockTags.VALID_SPAWN.values()) {
-            if (!biomeSource.getTopMaterials().contains(lv5.getDefaultState())) continue;
-            bl3 = true;
-            break;
-        }
-        BlockPos finalSpawnPoint = chunkPos.getStartPos().add(8, i, 8);
-        int j = 0;
-        int k = 0;
-        int l = 0;
-        int m = -1;
-        int n = 32;
-        for (int o = 0; o < 1024; ++o) {
-            BlockPos lv7;
-            if (j > -16 && j <= 16 && k > -16 && k <= 16 && (lv7 =
-                findServerSpawnPoint(fakeServerWorld, new ChunkPos(chunkPos.x + j, chunkPos.z + k),
-                    bl3)) != null) {
-                finalSpawnPoint = lv7;
-                break;
+            BiomeSource biomeSource = chunkGenerator.getBiomeSource();
+            List<Biome> list = biomeSource.getSpawnBiomes();
+            Random random = new Random(seed);
+            BlockPos blockPos = biomeSource.locateBiome(0, fakeServerWorld.getSeaLevel(), 0, 256, list, random);
+            ChunkPos chunkPos = blockPos == null ? new ChunkPos(0, 0) : new ChunkPos(blockPos);
+            boolean bl4 = false;
+            Iterator var12 = BlockTags.VALID_SPAWN.values().iterator();
+
+            while(var12.hasNext()) {
+                Block block = (Block)var12.next();
+                if (biomeSource.getTopMaterials().contains(block.getDefaultState())) {
+                    bl4 = true;
+                    break;
+                }
             }
-            if (j == k || j < 0 && j == -k || j > 0 && j == 1 - k) {
-                int p = l;
-                l = -m;
-                m = p;
+
+            spawnpos = new BlockPos(chunkPos.getCenterBlockPos().add(8, chunkGenerator.getSpawnHeight(), 8));
+            int i = 0;
+            int j = 0;
+            int k = 0;
+            int l = -1;
+            int m = 1;
+
+            for(int n = 0; n < 1024; ++n) {
+                if (i > -16 && i <= 16 && j > -16 && j <= 16) {
+                    BlockPos blockPos2 = getSpawnPosInChunk(fakeServerWorld, new ChunkPos(chunkPos.x + i, chunkPos.z + j), bl4);
+                    if (blockPos2 != null) {
+                        spawnpos = blockPos2;
+                        break;
+                    }
+                }
+
+                if (i == j || i < 0 && i == -j || i > 0 && i == 1 - j) {
+                    int o = k;
+                    k = -l;
+                    l = o;
+                }
+
+                i += k;
+                j += l;
             }
-            j += l;
-            k += m;
         }
-        return finalSpawnPoint;
+        return spawnpos;
     }
 
-    //Helper method for getSpawnPos
-    private BlockPos findServerSpawnPoint(World world, ChunkPos chunkPos,
-                                          boolean validSpawnNeeded){
+
+    public BlockPos getSpawnPosInChunk(ServerWorld serverLevel, ChunkPos chunkPos, boolean bl) {
         for (int i = chunkPos.getStartX(); i <= chunkPos.getEndX(); ++i) {
             for (int j = chunkPos.getStartZ(); j <= chunkPos.getEndZ(); ++j) {
-                BlockPos blockPos = findOverworldSpawn(world, i, j, validSpawnNeeded);
-                if (blockPos != null) {
-                    return blockPos;
-                }
+                BlockPos blockPos = findOverworldSpawn(serverLevel, i, j, bl);
+                if (blockPos == null) continue;
+                return blockPos;
             }
         }
         return null;
     }
+
 
     //Another helper method for getSpawnPos
     private BlockPos findOverworldSpawn(World world, int x, int z,
@@ -226,15 +261,15 @@ public class SeedChunkGenerator {
         BlockPos.Mutable mutable = new BlockPos.Mutable(x, 0, z);
         Biome biome = world.getBiome(mutable);
         boolean bl = world.getDimension().hasCeiling();
-        BlockState blockState = biome.getGenerationSettings().getSurfaceConfig().getTopMaterial();
+        BlockState blockState = biome.getSurfaceConfig().getTopMaterial();
         if (validSpawnNeeded && !blockState.isIn(BlockTags.VALID_SPAWN)) {
             return null;
         } else {
             Chunk worldChunk = getOrBuildChunk(ChunkSectionPos.getSectionCoord(x),
                 ChunkSectionPos.getSectionCoord(z));
-            int i = bl ? chunkGenerator.getSpawnHeight(world) :
+            int i = bl ? chunkGenerator.getSpawnHeight() :
                 worldChunk.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING, x & 15, z & 15);
-            if (i < world.getBottomY()) {
+            if (i < 0) {
                 return null;
             } else {
                 int j = worldChunk.sampleHeightmap(Heightmap.Type.WORLD_SURFACE, x & 15, z & 15);
@@ -242,7 +277,7 @@ public class SeedChunkGenerator {
                     j > worldChunk.sampleHeightmap(Heightmap.Type.OCEAN_FLOOR, x & 15, z & 15)) {
                     return null;
                 } else {
-                    for (int k = i + 1; k >= world.getBottomY(); --k) {
+                    for (int k = i + 1; k >= 0; --k) {
                         mutable.set(x, k, z);
                         BlockState blockState2 = getBlockState(mutable.getX(), mutable.getY(),
                             mutable.getZ());
@@ -291,7 +326,7 @@ public class SeedChunkGenerator {
         ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
         ProtoChunk chunk = chunkMap.get(pos);
         if (chunk == null) {
-            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA, fakeServerWorld);
+            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA);
         }
         if (chunk.getStatus().getIndex() < targetLevel) {
             chunk = getOrBuildChunk(pos.x, pos.z);
@@ -321,7 +356,7 @@ public class SeedChunkGenerator {
         ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
         ProtoChunk chunk = chunkMap.get(pos);
         if (chunk == null) {
-            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA, fakeServerWorld);
+            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA);
         }
         if (chunk.getStatus().getIndex() < targetLevel) {
             chunk = getOrBuildChunk(pos.x, pos.z);
@@ -351,7 +386,7 @@ public class SeedChunkGenerator {
         ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
         ProtoChunk chunk = chunkMap.get(pos);
         if (chunk == null) {
-            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA, fakeServerWorld);
+            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA);
         }
         if (chunk.getStatus().getIndex() < targetLevel) {
             chunk = getOrBuildChunk(pos.x, pos.z);
@@ -379,14 +414,14 @@ public class SeedChunkGenerator {
      */
     public List<ItemStack> generateChestLoot(int x, int y, int z){
         ChestBlockEntity chest = (ChestBlockEntity) getBlockEntity(x, y, z);
-        if(chest==null){
+        if (chest == null) {
             return new ArrayList<>();
         }
         Identifier lootTableId = (Identifier) ReflectionUtils.getValueFromField(chest, "lootTableId");
         long lootTableSeed = (long) ReflectionUtils.getValueFromField(chest, "lootTableSeed");
         LootTable lootTable = serverResourceManager.getLootManager().getTable(lootTableId);
         LootContext.Builder lootContextBuilder = new LootContext.Builder(fakeServerWorld).parameter(
-            LootContextParameters.ORIGIN, Vec3d.ofCenter(chest.getPos())).random(lootTableSeed);
+            LootContextParameters.POSITION, chest.getPos()).random(lootTableSeed);
         return lootTable.generateLoot(lootContextBuilder.build(LootContextTypes.CHEST));
     }
 
@@ -410,7 +445,7 @@ public class SeedChunkGenerator {
         ProtoChunk chunk;
 
         if (!chunkMap.containsKey(pos)) {
-            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA, fakeServerWorld);
+            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA);
             chunkMap.put(pos, chunk);
         } else {
             chunk = chunkMap.get(pos);
@@ -442,7 +477,7 @@ public class SeedChunkGenerator {
         ProtoChunk chunk;
 
         if (!chunkMap.containsKey(pos)) {
-            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA, fakeServerWorld);
+            chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA);
             chunkMap.put(pos, chunk);
         } else {
             chunk = chunkMap.get(pos);
@@ -512,7 +547,7 @@ public class SeedChunkGenerator {
                 ProtoChunk chunk;
 
                 if (!chunkMap.containsKey(pos)) {
-                    chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA, fakeServerWorld);
+                    chunk = new ProtoChunk(pos, UpgradeData.NO_UPGRADE_DATA);
                     STRUCTURE_STARTS(chunk);
                     chunkMap.put(pos, chunk);
                 } else {
@@ -537,8 +572,7 @@ public class SeedChunkGenerator {
     private void STRUCTURE_STARTS(ProtoChunk chunk) {
         if (chunk.getStatus().isAtLeast(ChunkStatus.STRUCTURE_STARTS))
             return;
-        chunkGenerator.setStructureStarts(fakeServerWorld.getRegistryManager(),
-            fakeServerWorld.getStructureAccessor(), chunk, structureManager, seed);
+        chunkGenerator.setStructureStarts(fakeServerWorld.getStructureAccessor(), chunk, structureManager, seed);
         chunk.setStatus(ChunkStatus.STRUCTURE_STARTS);
     }
 
@@ -550,9 +584,9 @@ public class SeedChunkGenerator {
         if (chunk.getStatus().isAtLeast(ChunkStatus.STRUCTURE_REFERENCES))
             return;
         ChunkRegion chunkRegion =
-            new ChunkRegion(fakeServerWorld, chunks, ChunkStatus.STRUCTURE_REFERENCES, -1);
+            new ChunkRegion(fakeServerWorld, chunks);
         chunkGenerator.addStructureReferences(chunkRegion,
-            fakeServerWorld.getStructureAccessor().forRegion(chunkRegion), chunk);
+            fakeServerWorld.getStructureAccessor(), chunk);
         chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
     }
 
@@ -564,7 +598,7 @@ public class SeedChunkGenerator {
         if (chunk.getStatus().isAtLeast(ChunkStatus.BIOMES))
             return;
         chunkGenerator
-            .populateBiomes(fakeServerWorld.getRegistryManager().get(Registry.BIOME_KEY), chunk);
+            .populateBiomes(chunk);
         chunk.setStatus(ChunkStatus.BIOMES);
     }
 
@@ -575,15 +609,8 @@ public class SeedChunkGenerator {
     private void NOISE(ProtoChunk chunk, List<Chunk> chunks){
         if (chunk.getStatus().isAtLeast(ChunkStatus.NOISE))
             return;
-        ChunkRegion chunkRegion = new ChunkRegion(fakeServerWorld, chunks, ChunkStatus.NOISE, 0);
-        try {
-            chunkGenerator
-                .populateNoise(null, fakeServerWorld.getStructureAccessor().forRegion(chunkRegion),
-                    chunk).get();
-        } catch (ExecutionException |InterruptedException e){
-            System.out.println("Error while generating chunk " + chunk.getPos() +" with seed "+ seed);
-            e.printStackTrace();
-        }
+        ChunkRegion chunkRegion = new ChunkRegion(fakeServerWorld, chunks);
+        chunkGenerator.populateNoise(null, fakeServerWorld.getStructureAccessor(), chunk);
         chunk.setStatus(ChunkStatus.NOISE);
     }
 
@@ -597,7 +624,7 @@ public class SeedChunkGenerator {
         //This is here to catch a very rare NPE in buildSurface. This means that 1 in 1000 wooded-badlands chunks will have an imperfect top. So be it.
         try {
             chunkGenerator.buildSurface(
-                new ChunkRegion(fakeServerWorld, ImmutableList.of(chunk), ChunkStatus.SURFACE, 0),
+                new ChunkRegion(fakeServerWorld, ImmutableList.of(chunk)),
                 chunk);
         } catch (NullPointerException e){
 
@@ -642,9 +669,13 @@ public class SeedChunkGenerator {
         Heightmap.populateHeightmaps(chunk, EnumSet
             .of(Heightmap.Type.MOTION_BLOCKING, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 Heightmap.Type.OCEAN_FLOOR, Heightmap.Type.WORLD_SURFACE));
-        ChunkRegion chunkRegion = new ChunkRegion(fakeServerWorld, chunks, ChunkStatus.FEATURES, 1);
-        chunkGenerator.generateFeatures(chunkRegion,
-            fakeServerWorld.getStructureAccessor().forRegion(chunkRegion));
+        ChunkRegion chunkRegion = new ChunkRegion(fakeServerWorld, chunks);
+
+        synchronized (DefaultBiomeFeatures.DEFAULT_FLOWER_CONFIG) {
+            chunkGenerator.generateFeatures(chunkRegion,
+                fakeServerWorld.getStructureAccessor());
+        }
+
         chunk.setStatus(ChunkStatus.FEATURES);
 
         for (LongSet chunkPosLongs : chunk.getStructureReferences().values()) {
@@ -693,7 +724,7 @@ public class SeedChunkGenerator {
     private void SPAWN(ProtoChunk chunk) {
         if (chunk.getStatus().isAtLeast(ChunkStatus.SPAWN))
             return;
-        chunkGenerator.populateEntities(new ChunkRegion(fakeServerWorld, ImmutableList.of(chunk), ChunkStatus.SPAWN, -1));
+        chunkGenerator.populateEntities(new ChunkRegion(fakeServerWorld, ImmutableList.of(chunk)));
         chunk.setStatus(ChunkStatus.FULL);
     }
 
@@ -705,21 +736,21 @@ public class SeedChunkGenerator {
      * @param name A simple filter applied to the entity name.
      * @param box The box to search within.
      * @param predicate A more advanced filter to check if the entity matches your criteria.
-     * @return A list of {@link NbtCompound}s of the entities that where found.
+     * @return A list of {@link CompoundTag}s of the entities that where found.
      */
-    public List<NbtCompound> getEntitiesInBox(String name, Box box, Predicate<NbtCompound> predicate) {
+    public List<CompoundTag> getEntitiesInBox(String name, Box box, Predicate<CompoundTag> predicate) {
         if(targetLevel<10){
             throw new IllegalStateException("Tried to generate entities without entity generation allowed.\nTo allow this, call the constructor of SeedChecker with third argument 10 or higher.");
         }
         int chunkCountx = (int) box.getXLength()/16;
         int chunkCountz = (int) box.getZLength()/16;
-        List<NbtCompound> list = Lists.newArrayList();
+        List<CompoundTag> list = Lists.newArrayList();
         for (int x = (int)box.minX>>4; x < ((int)box.minX>>4)+chunkCountx; x++) {
             for (int z = (int)box.minZ>>4; z < ((int)box.minZ>>4)+chunkCountz ; z++) {
                 ProtoChunk chunk = getOrBuildChunk(x, z);
-                for(NbtCompound nbtCompound : chunk.getEntities()){
+                for(CompoundTag nbtCompound : chunk.getEntities()){
                     if(nbtCompound.get("id").asString().toLowerCase().contains(name.toLowerCase())) {
-                        NbtList s = (NbtList)nbtCompound.get("Pos");
+                        ListTag s = (ListTag)nbtCompound.get("Pos");
                         double mobx = s.getDouble(0);
                         double moby = s.getDouble(1);
                         double mobz = s.getDouble(2);
@@ -740,9 +771,9 @@ public class SeedChunkGenerator {
      *       appropriate type (NbtLong, NbtString, etc).
      * @param name A simple filter applied to the entity name.
      * @param box The box to search within.
-     * @return A list of {@link NbtCompound}s of the entities that where found.
+     * @return A list of {@link CompoundTag}s of the entities that where found.
      */
-    public List<NbtCompound> getEntitiesInBox(String name, Box box) {
+    public List<CompoundTag> getEntitiesInBox(String name, Box box) {
         return this.getEntitiesInBox(name, box, compound -> true);
     }
 
@@ -752,9 +783,9 @@ public class SeedChunkGenerator {
      * NOTE: NbtCompounds arent great to work with. When getting a value from it you have to first cast it to the
      *       appropriate type (NbtLong, NbtString, etc).
      * @param box The box to search within.
-     * @return A list of {@link NbtCompound}s of the entities that where found.
+     * @return A list of {@link CompoundTag}s of the entities that where found.
      */
-    public List<NbtCompound> getEntitiesInBox(Box box) {
+    public List<CompoundTag> getEntitiesInBox(Box box) {
         return getEntitiesInBox("", box);
     }
 
@@ -838,6 +869,18 @@ public class SeedChunkGenerator {
             }
         }
         return count;
+    }
+
+    /**
+     * Clear all the chunk data.
+     */
+    public void clearMemory(){
+        for(ChunkPos pos : chunkMap.keySet()){
+            ProtoChunk chunk = chunkMap.get(pos);
+            chunk = null;
+            chunkMap.remove(pos);
+        }
+        Runtime.getRuntime().gc();
     }
 
     /**

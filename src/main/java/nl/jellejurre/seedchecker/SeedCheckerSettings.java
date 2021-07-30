@@ -3,6 +3,17 @@ package nl.jellejurre.seedchecker;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
+import net.minecraft.resource.FileResourcePackProvider;
+import net.minecraft.resource.ResourcePack;
+import net.minecraft.resource.ResourcePackProfile;
+import net.minecraft.resource.ResourcePackProvider;
+import net.minecraft.resource.ResourcePackSource;
+import net.minecraft.resource.metadata.PackResourceMetadata;
+import net.minecraft.text.Text;
+import net.minecraft.util.WorldSavePath;
+import net.minecraft.util.registry.RegistryTracker;
+import net.minecraft.world.level.storage.LevelStorage;
 import nl.jellejurre.seedchecker.serverMocks.FakeLogger;
 import nl.jellejurre.seedchecker.serverMocks.FakeServerResourceManager;
 import net.minecraft.Bootstrap;
@@ -16,7 +27,6 @@ import net.minecraft.resource.VanillaDataPackProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.util.Util;
-import net.minecraft.util.registry.DynamicRegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.message.MessageFactory;
 import org.apache.logging.log4j.spi.ExtendedLogger;
@@ -24,9 +34,9 @@ import org.apache.logging.log4j.spi.LoggerContext;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
 
 public class SeedCheckerSettings {
-    public static DynamicRegistryManager.Impl registryManager;
-    public static ResourcePackManager resourcePackManager;
+    public static RegistryTracker.Modifiable registryManager;
     public static ServerResourceManager serverResourceManager;
+    public static ResourcePackManager resourcePackManager;
     public static ResourceManager resourceManager;
     private static boolean init = false;
 
@@ -128,18 +138,29 @@ public class SeedCheckerSettings {
                 @Override public java.io.PrintStream append(char c) { return this; }
             });
             //Setup our ResourceManagers and constants
-            SharedConstants.createGameVersion();
+            SharedConstants.getGameVersion();
             ReflectionUtils.setValueOfStaticField(Bootstrap.class, "initialized", true);
-            registryManager = DynamicRegistryManager.create();
-            resourcePackManager =
-                new ResourcePackManager(ResourceType.SERVER_DATA, new VanillaDataPackProvider());
-            MinecraftServer.loadDataPacks(resourcePackManager, DataPackSettings.SAFE_MODE, true);
+            registryManager = RegistryTracker.create();
             try {
-                serverResourceManager = FakeServerResourceManager
-                    .reload(resourcePackManager.createResourcePacks(), registryManager,
-                        CommandManager.RegistrationEnvironment.DEDICATED, 3,
-                        Util.getMainWorkerExecutor(),
-                        Runnable::run).get();
+                resourcePackManager = new ResourcePackManager(ResourcePackProfile::new,
+                    new VanillaDataPackProvider());
+                MinecraftServer.loadDataPacks(resourcePackManager, DataPackSettings.SAFE_MODE, true);
+//                public ResourcePackManager(ResourcePackProfile.Factory profileFactory,
+//                    ResourcePackProvider ... providers) {
+//                    this.profileFactory = profileFactory;
+//                    this.providers = ImmutableSet.copyOf(providers);
+//                }
+//
+//                public ResourcePackManager(ResourceType arg, ResourcePackProvider ... args) {
+//                                this((String string, Text arg2, boolean bl, Supplier<ResourcePack> supplier, PackResourceMetadata arg3, ResourcePackProfile.InsertionPosition arg4, ResourcePackSource arg5)
+//                                    -> new ResourcePackProfile(string, arg2, bl, supplier, arg3, arg, arg4, arg5), args);
+//                }
+
+                serverResourceManager = (FakeServerResourceManager) FakeServerResourceManager
+                    .reload(resourcePackManager.createResourcePacks(), RegistryTracker.create(), null, 3,
+                        Util.getServerWorkerExecutor(),
+                        Util.getServerWorkerExecutor()
+                    ).get();
             } catch (ExecutionException | InterruptedException ex) {
                 System.out.println("Couldn't reload FakeServerResourceManager");
                 ex.printStackTrace();
