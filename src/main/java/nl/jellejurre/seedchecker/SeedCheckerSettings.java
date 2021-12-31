@@ -16,6 +16,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.util.Util;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import nl.jellejurre.seedchecker.serverMocks.FakeLogger;
+import nl.jellejurre.seedchecker.serverMocks.FakeLoggerContextFactory;
 import nl.jellejurre.seedchecker.serverMocks.FakeServerResourceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.message.MessageFactory;
@@ -43,57 +44,8 @@ public class SeedCheckerSettings {
     public static void initialise(){
         if(init==false) {
             //Remove the loggers, we don't want log files
-            LogManager.setFactory(new LoggerContextFactory() {
-                @Override
-                public LoggerContext getContext(String fqcn, ClassLoader loader,
-                                                Object externalContext, boolean currentContext) {
-                    return new LoggerContext() {
-                        @Override
-                        public Object getExternalContext() {
-                            return null;
-                        }
+            LogManager.setFactory(new FakeLoggerContextFactory());
 
-                        @Override
-                        public ExtendedLogger getLogger(String name) {
-                            return new FakeLogger();
-                        }
-
-                        @Override
-                        public ExtendedLogger getLogger(String name,
-                                                        MessageFactory messageFactory) {
-                            return new FakeLogger();
-                        }
-
-                        @Override
-                        public boolean hasLogger(String name) {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean hasLogger(String name, MessageFactory messageFactory) {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean hasLogger(String name,
-                                                 Class<? extends MessageFactory> messageFactoryClass) {
-                            return true;
-                        }
-                    };
-                }
-
-                @Override
-                public LoggerContext getContext(String fqcn, ClassLoader loader,
-                                                Object externalContext, boolean currentContext,
-                                                URI configLocation, String name) {
-                    return null;
-                }
-
-                @Override
-                public void removeContext(LoggerContext context) {
-
-                }
-            });
             //Temporarily set the System.out to not display, since the initialisation prints lines, which we don't like.
             PrintStream outStream = System.out;
             System.setOut(new java.io.PrintStream(new java.io.OutputStream() {
@@ -133,7 +85,7 @@ public class SeedCheckerSettings {
             });
             //Setup our ResourceManagers and constants
             SharedConstants.createGameVersion();
-            ReflectionUtils.setValueOfStaticField(Bootstrap.class, "initialized", true);
+            ReflectionUtils.setValueOfStaticField(Bootstrap.class, "field_13357", true);
             registryManager = DynamicRegistryManager.create();
             resourcePackManager =
                 new ResourcePackManager(ResourceType.SERVER_DATA, new VanillaDataPackProvider());

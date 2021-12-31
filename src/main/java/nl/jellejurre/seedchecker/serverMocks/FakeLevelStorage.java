@@ -8,6 +8,7 @@ import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSaveHandler;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelStorage;
 import nl.jellejurre.seedchecker.ReflectionUtils;
 
@@ -19,12 +20,12 @@ public class FakeLevelStorage extends LevelStorage {
         super(savesDirectory, backupsDirectory, dataFixer);
     }
     private void init() {
-        this.savesDirectory = Path.of("this.does.not.exist");
+        this.savesDirectory = Path.of("seedCheckerLib");
     }
 
     @Override
     public Path getSavesDirectory() {
-        return Path.of("this.does.not.exist");
+        return Path.of("seedCheckerLib");
     }
 
     public static FakeLevelStorage create(Path path) {
@@ -54,10 +55,6 @@ public class FakeLevelStorage extends LevelStorage {
             super(directoryName);
         }
 
-        @Override
-        public File getWorldDirectory(RegistryKey<World> key) {
-            return null;
-        }
 
         @Override
         public WorldSaveHandler createSaveHandler() {
@@ -66,7 +63,13 @@ public class FakeLevelStorage extends LevelStorage {
 
         @Override
         public Path getDirectory(WorldSavePath savePath) {
-            return Path.of("this.does.not.exist");
+            return Path.of("seedCheckerLib");
         }
+
+        @Override
+        public Path getWorldDirectory(RegistryKey<World> key) {
+            return Path.of("seedCheckerLib");
+        }
+
     }
 }

@@ -15,7 +15,6 @@ import java.security.KeyPair;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -50,7 +49,6 @@ import net.minecraft.util.profiler.ProfilerTiming;
 import net.minecraft.util.profiler.Recorder;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.util.snooper.Snooper;
 import net.minecraft.util.thread.MessageListener;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.SaveProperties;
@@ -88,7 +86,6 @@ public class FakeMinecraftServer extends MinecraftServer {
     public static  long MILLISECONDS_PER_TICK = 50L;
     protected  LevelStorage.Session session;
     protected  WorldSaveHandler saveHandler;
-    public  Snooper snooper = new Snooper("server", this, Util.getMeasuringTimeMs());
     public  List<Runnable> serverGuiTickables = Lists.newArrayList();
     public Recorder tickTimeTracker;
     public Profiler profiler;
@@ -118,7 +115,7 @@ public class FakeMinecraftServer extends MinecraftServer {
     @Nullable
     public String motd;
     public int playerIdleTimeout;
-    public  long[] lastTickLengths;
+    public long[] lastTickLengths;
     @Nullable
     public KeyPair keyPair;
     @Nullable
@@ -222,16 +219,16 @@ public class FakeMinecraftServer extends MinecraftServer {
         this.serverPort = -1;
         this.worlds = Maps.newLinkedHashMap();
         this.running = true;
-        this.lastTickLengths = new long[100];
+        ReflectionUtils.setValueOfField(this, "lastTickLengths", new long[100]);
         this.resourcePackUrl = "";
         this.resourcePackHash = "";
         this.timeReference = Util.getMeasuringTimeMs();
         this.scoreboard = new ServerScoreboard(this);
         this.bossBarManager = new BossBarManager();
         this.metricsData = new MetricsData();
-        this.registryManager = registryManager;
-        this.saveProperties = saveProperties;
-        this.proxy = proxy;
+        ReflectionUtils.setValueOfField(this, "registryManager", registryManager);
+        ReflectionUtils.setValueOfField(this, "saveProperties",  saveProperties);
+        ReflectionUtils.setValueOfField(this, "proxy", proxy);
         this.dataPackManager = dataPackManager;
         this.serverResourceManager = serverResourceManager;
         this.sessionService = sessionService;
@@ -243,8 +240,8 @@ public class FakeMinecraftServer extends MinecraftServer {
 
         this.networkIo = new ServerNetworkIo(this);
         this.worldGenerationProgressListenerFactory = worldGenerationProgressListenerFactory;
-        this.session = session;
-        this.saveHandler = session.createSaveHandler();
+        ReflectionUtils.setValueOfField(this, "session", session);
+        ReflectionUtils.setValueOfField(this, "saveHandler", session.createSaveHandler());
         this.dataFixer = dataFixer;
         this.structureManager = new StructureManager(serverResourceManager.getResourceManager(), session, dataFixer);
         this.serverThread = serverThread;
@@ -280,11 +277,6 @@ public class FakeMinecraftServer extends MinecraftServer {
     @Override
     public boolean shouldBroadcastRconToOps() {
         return false;
-    }
-
-    @Override
-    public Optional<String> getModdedStatusMessage() {
-        return Optional.empty();
     }
 
     @Override
@@ -393,4 +385,14 @@ public class FakeMinecraftServer extends MinecraftServer {
             };
         }
     }
+
+    @Override
+    public boolean canExecute(ServerTask task){
+        return true;
+    };
+
+    @Override
+    protected ServerTask createTask(Runnable runnable){
+        return null;
+    };
 }

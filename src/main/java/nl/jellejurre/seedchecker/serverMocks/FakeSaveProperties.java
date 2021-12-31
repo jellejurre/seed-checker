@@ -1,15 +1,20 @@
 package nl.jellejurre.seedchecker.serverMocks;
 
 import com.mojang.serialization.Lifecycle;
+import java.util.Properties;
 import java.util.Set;
 import net.minecraft.client.world.GeneratorType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.resource.DataPackSettings;
 import net.minecraft.util.registry.DynamicRegistryManager;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.SaveProperties;
+import net.minecraft.world.dimension.DimensionOptions;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.level.LevelInfo;
 import net.minecraft.world.level.ServerWorldProperties;
@@ -20,7 +25,11 @@ public class FakeSaveProperties implements SaveProperties {
     private GeneratorOptions generatorOptions;
 
     public FakeSaveProperties(DynamicRegistryManager.Impl registryManager, long seed) {
-        generatorOptions = GeneratorType.DEFAULT.createDefaultOptions(registryManager, seed, true, false);
+//        generatorOptions = GeneratorType.DEFAULT.createDefaultOptions(registryManager, seed, true, false);
+        SimpleRegistry<DimensionOptions>
+            dimensionOptions = DimensionType.createDefaultDimensionOptions(registryManager, seed);
+        Registry<DimensionType> dimensionTypes = registryManager.get(Registry.DIMENSION_TYPE_KEY);
+        generatorOptions = new GeneratorOptions(seed, true, false, GeneratorOptions.getRegistryWithReplacedOverworldGenerator(dimensionTypes, dimensionOptions, GeneratorOptions.createOverworldGenerator(registryManager, seed)));
     }
 
     @Override
@@ -58,7 +67,7 @@ public class FakeSaveProperties implements SaveProperties {
 
     @Override
     public ServerWorldProperties getMainWorldProperties() {
-        return this.fakeServerWorldProperties;
+        return fakeServerWorldProperties;
     }
 
     @Override

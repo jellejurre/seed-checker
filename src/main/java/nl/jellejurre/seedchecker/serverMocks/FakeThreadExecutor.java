@@ -1,8 +1,10 @@
 package nl.jellejurre.seedchecker.serverMocks;
 
+import ca.weblite.objc.annotations.Msg;
+import net.minecraft.util.thread.MessageListener;
 import net.minecraft.util.thread.ThreadExecutor;
 
-public class FakeThreadExecutor extends ThreadExecutor<Runnable> {
+public class FakeThreadExecutor extends ThreadExecutor<Runnable>{
     protected FakeThreadExecutor(String name) {
         super(name);
     }
@@ -21,4 +23,14 @@ public class FakeThreadExecutor extends ThreadExecutor<Runnable> {
     protected Thread getThread() {
         return null;
     }
+
+    @Override
+    public String getName(){
+        return "";
+    };
+
+    @Override
+    public void send(Runnable message){
+
+    };
 }

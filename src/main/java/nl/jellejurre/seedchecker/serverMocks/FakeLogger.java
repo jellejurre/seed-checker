@@ -1,16 +1,39 @@
 package nl.jellejurre.seedchecker.serverMocks;
 
+import nl.jellejurre.seedchecker.ReflectionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.message.EntryMessage;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.MessageFactory;
-import org.apache.logging.log4j.spi.ExtendedLogger;
 import org.apache.logging.log4j.util.MessageSupplier;
 import org.apache.logging.log4j.util.Supplier;
 
-public class FakeLogger implements ExtendedLogger {
+public class FakeLogger extends Logger {
 
+    /**
+     * The constructor.
+     *
+     * @param context        The LoggerContext this Logger is associated with.
+     * @param name           The name of the Logger.
+     * @param messageFactory The message factory.
+     */
+    protected FakeLogger(LoggerContext context, String name,
+                         MessageFactory messageFactory) {
+        super(context, name, messageFactory);
+    }
+
+    public static FakeLogger createFakeLogger() {
+        try {
+            return (FakeLogger) ReflectionUtils.unsafe.allocateInstance(FakeLogger.class);
+        } catch (Exception e) {
+            System.out.println("yeet");
+        }
+
+        return null;
+    }
 
     @Override
     public boolean isEnabled(Level level, Marker marker, Message message, Throwable t) {

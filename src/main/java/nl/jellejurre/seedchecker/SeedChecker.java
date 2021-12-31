@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.chunk.ProtoChunk;
 
 public class SeedChecker {
@@ -376,6 +377,10 @@ public class SeedChecker {
      */
     public ProtoChunk getChunk(ChunkPos pos, int targetLevel){
         return seedChunkGenerator.getOrBuildChunk(pos, targetLevel);
+    }
+
+    public ProtoChunk getChunk(BlockPos pos) {
+        return getChunk(pos.getX() % 16, pos.getZ() % 16);
     }
 
     /**

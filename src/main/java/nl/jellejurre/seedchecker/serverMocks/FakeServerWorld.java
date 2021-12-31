@@ -23,20 +23,24 @@ import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.EntityList;
+import net.minecraft.world.SaveProperties;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.UpgradeData;
+import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.entity.EntityHandler;
 import net.minecraft.world.entity.EntityLookup;
 import net.minecraft.world.event.listener.EntityGameEventHandler;
-import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.Spawner;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.storage.ChunkDataAccess;
 import net.minecraft.world.storage.EntityChunkDataAccess;
+import net.minecraft.world.tick.ChunkTickScheduler;
 import nl.jellejurre.seedchecker.SeedChunkGenerator;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,7 +67,7 @@ public class FakeServerWorld extends ServerWorld {
         this.entityList = new EntityList();
         this.loadedMobs = new ObjectOpenHashSet();
         DataFixer dataFixer = server.getDataFixer();
-        ChunkDataAccess<Entity> chunkDataAccess = new EntityChunkDataAccess(this, new File(session.getWorldDirectory(worldKey), "entities"), dataFixer, false, server);
+        ChunkDataAccess<Entity> chunkDataAccess = new EntityChunkDataAccess(this, new File(session.getWorldDirectory(worldKey).toFile(), "entities").toPath(), dataFixer, false, server);
         entityManager = new ServerEntityManager(Entity.class, new FakeServerWorld.FakeServerEntityHandler(), chunkDataAccess);
 
     }
@@ -71,6 +75,12 @@ public class FakeServerWorld extends ServerWorld {
     @Override
     public BlockState getBlockState(BlockPos pos) {
         return checker.getBlockState(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    @Override
+    public WorldChunk getChunk(int chunkX, int chunkZ) {
+        Chunk chunk = getChunk(chunkX, chunkZ, ChunkStatus.FULL);
+        return new WorldChunk(this, chunk.getPos(), UpgradeData.NO_UPGRADE_DATA, new ChunkTickScheduler(), new ChunkTickScheduler(), 0L, chunk.getSectionArray(), null, null);
     }
 
     @Override
@@ -88,11 +98,10 @@ public class FakeServerWorld extends ServerWorld {
                                          RegistryKey<World> worldRegistryKey,
                                          DimensionType dimensionType, long seed,
                                          ResourcePackManager resourcePackManager,
+                                         SaveProperties saveProperties,
                                          ChunkGenerator chunkGenerator,
                                          ServerResourceManager serverResourceManager, SeedChunkGenerator seedChecker, FakeLevelStorage.FakeSession session) {
         try {
-
-            FakeSaveProperties saveProperties = new FakeSaveProperties(registryManager, seed);
 
             FakeMinecraftServer server =
                 FakeMinecraftServer.getMinecraftServer(registryManager, session, saveProperties, resourcePackManager,

@@ -1,6 +1,7 @@
 package nl.jellejurre.seedchecker;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import sun.misc.Unsafe;
 
 public class ReflectionUtils {
@@ -54,6 +55,10 @@ public class ReflectionUtils {
             e.printStackTrace();
         }
     }
+
+//    public static void redirectMethod(Class clazz) {
+//        unsafe
+//    }
 
     //Sets a value of a field of an object provided
     public static void setValueOfField(Object instance, String fieldName, Object value) {
