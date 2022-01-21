@@ -219,16 +219,16 @@ public class FakeMinecraftServer extends MinecraftServer {
         this.serverPort = -1;
         this.worlds = Maps.newLinkedHashMap();
         this.running = true;
-        ReflectionUtils.setValueOfField(this, "lastTickLengths", new long[100]);
+        ReflectionUtils.setValueOfField(this, "lastTickLengths", "lastTickLengths", new long[100]);
         this.resourcePackUrl = "";
         this.resourcePackHash = "";
         this.timeReference = Util.getMeasuringTimeMs();
         this.scoreboard = new ServerScoreboard(this);
         this.bossBarManager = new BossBarManager();
         this.metricsData = new MetricsData();
-        ReflectionUtils.setValueOfField(this, "registryManager", registryManager);
-        ReflectionUtils.setValueOfField(this, "saveProperties",  saveProperties);
-        ReflectionUtils.setValueOfField(this, "proxy", proxy);
+        ReflectionUtils.setValueOfField(this, "registryManager", "registryManager", registryManager);
+        ReflectionUtils.setValueOfField(this, "saveProperties", "saveProperties",  saveProperties);
+        ReflectionUtils.setValueOfField(this, "proxy", "proxy", proxy);
         this.dataPackManager = dataPackManager;
         this.serverResourceManager = serverResourceManager;
         this.sessionService = sessionService;
@@ -240,8 +240,8 @@ public class FakeMinecraftServer extends MinecraftServer {
 
         this.networkIo = new ServerNetworkIo(this);
         this.worldGenerationProgressListenerFactory = worldGenerationProgressListenerFactory;
-        ReflectionUtils.setValueOfField(this, "session", session);
-        ReflectionUtils.setValueOfField(this, "saveHandler", session.createSaveHandler());
+        ReflectionUtils.setValueOfField(this, "session", "session", session);
+        ReflectionUtils.setValueOfField(this, "saveHandler", "saveHandler", session.createSaveHandler());
         this.dataFixer = dataFixer;
         this.structureManager = new StructureManager(serverResourceManager.getResourceManager(), session, dataFixer);
         this.serverThread = serverThread;

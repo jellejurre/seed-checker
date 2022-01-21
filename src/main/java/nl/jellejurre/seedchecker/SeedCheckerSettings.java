@@ -85,7 +85,7 @@ public class SeedCheckerSettings {
             });
             //Setup our ResourceManagers and constants
             SharedConstants.createGameVersion();
-            ReflectionUtils.setValueOfStaticField(Bootstrap.class, "field_13357", true);
+            ReflectionUtils.setValueOfStaticField(Bootstrap.class, "field_13357", "initialized", true);
             registryManager = DynamicRegistryManager.create();
             resourcePackManager =
                 new ResourcePackManager(ResourceType.SERVER_DATA, new VanillaDataPackProvider());

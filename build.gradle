@@ -6,6 +6,7 @@ plugins {
 
 repositories {
     maven {url "https://jitpack.io"}
+    mavenLocal()
 }
 
 sourceCompatibility = JavaVersion.VERSION_16
@@ -19,11 +20,9 @@ def ENV = System.getenv()
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:1.18.1"
-    mappings "net.fabricmc:yarn:1.18.1+build.12:v2"
+    mappings "net.fabricmc:yarn:1.18.1+build.local-seedChecker"
     modImplementation "net.fabricmc:fabric-loader:0.12.12"
 
-    //Fabric api
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.45.0+1.18"
     testImplementation(platform('org.junit:junit-bom:5.7.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
@@ -62,23 +61,12 @@ jar {
 }
 
 shadowJar {
+    transform(Log4j2PluginsCacheFileTransformer)
     dependsOn remapJar
 }
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
-
-task remapShadowJar(type: ShadowJar) {
-    transform(Log4j2PluginsCacheFileTransformer)
-    manifest.attributes(
-            'Multi-Release': 'true',
-            'Main-Class' : 'nl.jellejurre.seedchecker.Main'
-    )
-    archiveClassifier.set("remapped-all")
-    from remapJar
-    from fileTree(dir: 'lib', include: '1.18.1-intermediary.jar')
-    configurations = [project.configurations.minecraftLibraries]
-}
 
 // configure the maven publication
 publishing {

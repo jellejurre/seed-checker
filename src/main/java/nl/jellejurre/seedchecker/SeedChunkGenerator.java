@@ -63,12 +63,13 @@ import net.minecraft.world.chunk.UpgradeData;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.gen.Blender;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.GeneratorOptions;
-import net.minecraft.world.gen.chunk.Blender;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
-import net.minecraft.world.gen.chunk.NoiseSamplingConfig;
+import net.minecraft.world.gen.Blender;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.NoiseChunkGenerator;
+import net.minecraft.world.gen.NoiseSamplingConfig;
 import nl.jellejurre.seedchecker.serverMocks.FakeLevelStorage;
 import nl.jellejurre.seedchecker.serverMocks.FakeLightingProvider;
 import nl.jellejurre.seedchecker.serverMocks.FakeSaveProperties;
@@ -173,7 +174,7 @@ public class SeedChunkGenerator {
         DimensionType endDimension = registryManager.get(Registry.DIMENSION_TYPE_KEY)
             .getOrThrow(DimensionType.THE_END_REGISTRY_KEY);
         //Turn off ender dragon fight
-        ReflectionUtils.setValueOfField(endDimension, "field_24764", false);
+        ReflectionUtils.setValueOfField(endDimension, "field_24764", "hasEnderDragonFight", false);
         fakeServerWorld = FakeServerWorld.create(registryManager, World.END,
             endDimension, seed,
             resourcePackManager, saveProperties, chunkGenerator, serverResourceManager, this, session);
@@ -344,8 +345,8 @@ public class SeedChunkGenerator {
         if(chest==null){
             return new ArrayList<>();
         }
-        Identifier lootTableId = (Identifier) ReflectionUtils.getValueFromField(chest, "field_12037");
-        long lootTableSeed = (long) ReflectionUtils.getValueFromField(chest, "field_12036");
+        Identifier lootTableId = (Identifier) ReflectionUtils.getValueFromField(chest, "field_12037", "lootTableId");
+        long lootTableSeed = (long) ReflectionUtils.getValueFromField(chest, "field_12036", "lootTableSeed");
         LootTable lootTable = serverResourceManager.getLootManager().getTable(lootTableId);
         LootContext.Builder lootContextBuilder = new LootContext.Builder(fakeServerWorld).parameter(
             LootContextParameters.ORIGIN, Vec3d.ofCenter(chest.getPos())).random(lootTableSeed);
