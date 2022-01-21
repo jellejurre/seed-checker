@@ -35,16 +35,16 @@ public class Example {
         BlockPos spawnpoint = checker.getSpawnPos();
 
         //Create a box around our spawn point (can be done like this, can also be given two BlockPos')
-        Box box = new Box(spawnpoint.getX() - 64, spawnpoint.getY() - 10, spawnpoint.getZ() - 64,
-            spawnpoint.getX() + 64, spawnpoint.getY() + 50, spawnpoint.getZ() + 64);
+        Box box = new Box(spawnpoint.getX() - 128, spawnpoint.getY() - 50, spawnpoint.getZ() - 128,
+            spawnpoint.getX() + 128, spawnpoint.getY() + 50, spawnpoint.getZ() + 128);
 
-        //Get the amount of log  blocks in the box
+        //Get the amount of log blocks in the box
         int logs = checker.getBlockCountInBox(Blocks.OAK_LOG, box);
 
-        //Get the amount of cactus blocks in the box
+        //Get the amount of dandelion blocks in the box
         int dandelions = checker.getBlockCountInBox(Blocks.DANDELION, box);
 
-        //Get the amount of iron golems in the box
+        //Get the amount of pigs in the box
         long pigs = checker.getEntitiesInBox("pig", box).stream().count();
 
         //Get all blockentities in the box which are a BlockEntityType.CHEST

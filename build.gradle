@@ -20,7 +20,7 @@ def ENV = System.getenv()
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:1.18.1"
-    mappings "net.fabricmc:yarn:1.18.1+build.local-seedChecker"
+    mappings "com.github.jellejurre:yarn:1156d87670"
     modImplementation "net.fabricmc:fabric-loader:0.12.12"
 
     testImplementation(platform('org.junit:junit-bom:5.7.2'))

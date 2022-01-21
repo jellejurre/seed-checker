@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 public class CrashTest {
     public static ConcurrentHashMap<Long, Long> count = new ConcurrentHashMap<>();
 
-//    @Test
+    @Test
     public void singleThreadedTest(){
         try {
             for (int i = 0; i < 10; i++) {
@@ -41,7 +41,7 @@ public class CrashTest {
         }
     }
 
-//    @Test
+    @Test
     public void multiThreadedTest(){
         ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool((int)Math.ceil(Runtime.getRuntime().availableProcessors()*1/4d));
         for (int i = 0; i < 10; i++) {
@@ -56,7 +56,7 @@ public class CrashTest {
         }
     }
 
-//    @Test
+    @Test
     public void clearMemoryTest(){
         SeedChecker checker = new SeedChecker(1);
         Runtime r = Runtime.getRuntime();
