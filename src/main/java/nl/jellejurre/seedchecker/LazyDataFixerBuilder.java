@@ -1,7 +1,10 @@
 package nl.jellejurre.seedchecker;
 
+import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
+import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 
 import java.util.concurrent.Executor;
 

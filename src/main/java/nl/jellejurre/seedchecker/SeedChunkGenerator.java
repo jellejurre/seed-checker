@@ -95,7 +95,6 @@ public class SeedChunkGenerator {
     private ResourceManager resourceManager;
     private FakeLevelStorage.FakeSession session;
     private FakeSaveProperties saveProperties;
-    static public final DataFixer dataFixer = (DataFixer) new LazyDataFixerBuilder(SharedConstants.getGameVersion().getWorldVersion());
 
     private long seed;
     private int targetLevel;
@@ -124,7 +123,7 @@ public class SeedChunkGenerator {
             session = levelStorage.createSession();
             structureManager =
                 new StructureManager(resourceManager,
-                    session, dataFixer);
+                    session, ReplacedSchemas.getFixer());
         } catch (IOException e){
             System.out.println("Couldn't instantiate Structuremanager");
             e.printStackTrace();
@@ -138,7 +137,7 @@ public class SeedChunkGenerator {
         //If we want to create light for mob spawns, we need to get our lighting in a special way, otherwise just use our fake one
         if (createLight) {
             FakeThreadedAnvilChunkStorage
-                c = new FakeThreadedAnvilChunkStorage(fakeServerWorld, session, dataFixer,
+                c = new FakeThreadedAnvilChunkStorage(fakeServerWorld, session, ReplacedSchemas.getFixer(),
                 fakeServerWorld.getChunkManager());
             fakeLightingProvider = c.getLightingProvider();
         } else {
