@@ -4,12 +4,18 @@ import com.mojang.datafixers.DataFixer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSaveHandler;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.level.storage.LevelStorage;
+import nl.jellejurre.seedchecker.LazyDataFixerBuilder;
 import nl.jellejurre.seedchecker.ReflectionUtils;
 
 public class FakeLevelStorage extends LevelStorage {
@@ -47,8 +53,6 @@ public class FakeLevelStorage extends LevelStorage {
         }
         return null;
     }
-
-
 
     public class FakeSession extends LevelStorage.Session {
         public FakeSession(String directoryName) throws IOException {

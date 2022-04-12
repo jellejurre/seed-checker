@@ -21,7 +21,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import net.minecraft.command.DataCommandStorage;
-import net.minecraft.datafixer.Schemas;
 import net.minecraft.entity.boss.BossBarManager;
 import net.minecraft.loot.LootManager;
 import net.minecraft.loot.condition.LootConditionManager;
@@ -57,6 +56,7 @@ import net.minecraft.world.WorldSaveHandler;
 import net.minecraft.world.level.LevelInfo;
 import net.minecraft.world.level.storage.LevelStorage;
 import nl.jellejurre.seedchecker.ReflectionUtils;
+import nl.jellejurre.seedchecker.SeedChunkGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -154,8 +154,7 @@ public class FakeMinecraftServer extends MinecraftServer {
 
     public FakeMinecraftServer(DynamicRegistryManager.Impl registryManager, LevelStorage.Session levelStorageSession, SaveProperties saveProperties,
                                ResourcePackManager resourcePackManager, ServerResourceManager serverResourceManager, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, UserCache userCache) {
-        super(null, registryManager, levelStorageSession, saveProperties, resourcePackManager, Proxy.NO_PROXY, Schemas
-            .getFixer(), serverResourceManager, minecraftSessionService, gameProfileRepository, userCache, WorldGenerationProgressLogger::new);
+        super(null, registryManager, levelStorageSession, saveProperties, resourcePackManager, Proxy.NO_PROXY, SeedChunkGenerator.dataFixer, serverResourceManager, minecraftSessionService, gameProfileRepository, userCache, WorldGenerationProgressLogger::new);
 
         this.playerManager = new FakePlayerManager(this, null, null, 101);
     }
@@ -165,8 +164,7 @@ public class FakeMinecraftServer extends MinecraftServer {
         try {
             FakeMinecraftServer fakeMinecraftServer;
             fakeMinecraftServer = (FakeMinecraftServer) ReflectionUtils.unsafe.allocateInstance(FakeMinecraftServer.class);
-            fakeMinecraftServer.initialise(null, registryManager, levelStorageSession, saveProperties, resourcePackManager, Proxy.NO_PROXY, Schemas
-                .getFixer(), serverResourceManager, minecraftSessionService, gameProfileRepository, userCache, WorldGenerationProgressLogger::new);
+            fakeMinecraftServer.initialise(null, registryManager, levelStorageSession, saveProperties, resourcePackManager, Proxy.NO_PROXY, SeedChunkGenerator.dataFixer, serverResourceManager, minecraftSessionService, gameProfileRepository, userCache, WorldGenerationProgressLogger::new);
             return fakeMinecraftServer;
         } catch (Exception e) {
             e.printStackTrace();

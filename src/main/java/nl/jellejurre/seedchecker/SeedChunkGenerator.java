@@ -2,6 +2,7 @@ package nl.jellejurre.seedchecker;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.io.IOException;
@@ -16,12 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import net.minecraft.SharedConstants;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.datafixer.Schemas;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootTable;
@@ -93,6 +95,7 @@ public class SeedChunkGenerator {
     private ResourceManager resourceManager;
     private FakeLevelStorage.FakeSession session;
     private FakeSaveProperties saveProperties;
+    static public final DataFixer dataFixer = (DataFixer) new LazyDataFixerBuilder(SharedConstants.getGameVersion().getWorldVersion());
 
     private long seed;
     private int targetLevel;
@@ -121,8 +124,7 @@ public class SeedChunkGenerator {
             session = levelStorage.createSession();
             structureManager =
                 new StructureManager(resourceManager,
-                    session,
-                    Schemas.getFixer());
+                    session, dataFixer);
         } catch (IOException e){
             System.out.println("Couldn't instantiate Structuremanager");
             e.printStackTrace();
@@ -136,7 +138,7 @@ public class SeedChunkGenerator {
         //If we want to create light for mob spawns, we need to get our lighting in a special way, otherwise just use our fake one
         if (createLight) {
             FakeThreadedAnvilChunkStorage
-                c = new FakeThreadedAnvilChunkStorage(fakeServerWorld, session, Schemas.getFixer(),
+                c = new FakeThreadedAnvilChunkStorage(fakeServerWorld, session, dataFixer,
                 fakeServerWorld.getChunkManager());
             fakeLightingProvider = c.getLightingProvider();
         } else {
