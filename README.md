@@ -8,7 +8,7 @@ Add the following to your build.gradle repositories block
 ```
 and the following to your build.gradle dependencies block:
 ```
-    implementation('com.github.jellejurre:seed-checker:d01d2cafda'){transitive=false}
+    implementation('com.github.jellejurre:seed-checker:1.0.0-1.17.1'){transitive=false}
 ```
 
 p.s. If you want this code to run faster, you can add -Xmx4096M as a JVM option.
