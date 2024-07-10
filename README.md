@@ -6,11 +6,11 @@ This is a repostiory which allows you to run minecraft world generation and perf
 
 Add the following to your build.gradle repositories block
 ```    
-    maven {url "https://jitpack.io"}
+    maven {url "https://repo.jellejurre.dev"}
 ```
 and the following to your build.gradle dependencies block:
 ```
-    implementation('com.github.jellejurre:seed-checker:1.16.1-SNAPSHOT'){transitive=false}
+    implementation('com.github.jellejurre:seed-checker:1.2.0-1.16.1'){transitive=false}
 ```
 
 p.s. If you want this code to run faster, you can add -Xmx4096M as a JVM option.
